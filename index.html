@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>품목 조회</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      width: 320px;
+      text-align: center;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      cursor: pointer;
+    }
+    #result {
+      margin-top: 16px;
+      font-weight: bold;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>📦 품목 조회</h2>
+    <input type="text" id="itemName" placeholder="품목명 입력" />
+    <input type="text" id="itemCode" placeholder="품번 입력" />
+    <button onclick="checkItem()">조회하기</button>
+    <div id="result"></div>
+  </div>
+
+  <script>
+    async function checkItem() {
+      const itemName = document.getElementById('itemName').value;
+      const itemCode = document.getElementById('itemCode').value;
+      const resultDiv = document.getElementById('result');
+      resultDiv.innerText = "조회 중...";
+
+      try {
+        const res = await fetch("<<YOUR_GAS_URL>>", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ itemName, itemCode })
+        });
+        const data = await res.json();
+        resultDiv.innerText = data.result;
+      } catch (err) {
+        resultDiv.innerText = "연결 오류 발생: " + err;
+      }
+    }
+  </script>
+</body>
+</html>
