@@ -43,9 +43,16 @@
 </head>
 <body>
   <div class="container">
-    <h2>📦 품목 조회</h2>
-    <input type="text" id="itemName" placeholder="품목명 입력" />
-    <input type="text" id="itemCode" placeholder="품번 입력" />
+    <h2>📦천똑이 1호기! 품목 조회!</h2>
+    <div class="input-group">
+      <label for="itemName">품목</label>
+      <input type="text" id="itemName" placeholder="품목명 입력" />
+    </div>
+    <div class="input-group">
+      <label for="itemCode">품번</label>
+      <input type="text" id="itemCode" placeholder="품번 입력" />
+    </div>
+
     <button onclick="checkItem()">조회하기</button>
     <div id="result"></div>
   </div>
@@ -55,27 +62,16 @@
       const itemName = document.getElementById('itemName').value;
       const itemCode = document.getElementById('itemCode').value;
       const resultDiv = document.getElementById('result');
-
-      if(!itemName || !itemCode){
-        resultDiv.innerText = "품목명과 품번을 모두 입력해주세요.";
-        return;
-      }
-
       resultDiv.innerText = "조회 중...";
 
       try {
-        const res = await fetch("https://script.google.com/macros/s/AKfycbzwx-KJjru5pMGFQaUgMZCEjJcZzL1vuHbKPFTjNPrVMckjkaTmkMk23qHbf8jtdPkdZQ/exec", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            itemName: itemName,
-            itemCode: itemCode
-          })
-        });
+        // GET 요청으로 파라미터 전달
+        const url = `https://script.google.com/macros/s/AKfycbzuWKwsjwwARqu1EoBI5K5fybxKLXkccBjQXtygYTa1jfAwYPxLEA7m1i17QASwURborQ/exec?itemName=${encodeURIComponent(itemName)}&itemCode=${encodeURIComponent(itemCode)}`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(res.status + " " + res.statusText);
 
         const data = await res.json();
         resultDiv.innerText = data.result;
-
       } catch (err) {
         resultDiv.innerText = "연결 오류 발생: " + err;
       }
