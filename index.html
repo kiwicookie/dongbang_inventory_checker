@@ -55,16 +55,27 @@
       const itemName = document.getElementById('itemName').value;
       const itemCode = document.getElementById('itemCode').value;
       const resultDiv = document.getElementById('result');
+
+      if(!itemName || !itemCode){
+        resultDiv.innerText = "품목명과 품번을 모두 입력해주세요.";
+        return;
+      }
+
       resultDiv.innerText = "조회 중...";
 
       try {
-        const res = await fetch("https://script.google.com/macros/s/AKfycbzJR7YCb0Jss5WA1vDywkD7Wd_cM_Bx-o2xxSF1cgWSACJk4q1i0AqclE9j9Qw3_31BSw/exec", {
+        const res = await fetch("https://script.google.com/macros/s/AKfycbzwx-KJjru5pMGFQaUgMZCEjJcZzL1vuHbKPFTjNPrVMckjkaTmkMk23qHbf8jtdPkdZQ/exec", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ itemName, itemCode })
+          body: JSON.stringify({
+            itemName: itemName,
+            itemCode: itemCode
+          })
         });
+
         const data = await res.json();
         resultDiv.innerText = data.result;
+
       } catch (err) {
         resultDiv.innerText = "연결 오류 발생: " + err;
       }
