@@ -58,7 +58,7 @@
       resultDiv.innerText = "조회 중...";
 
       try {
-        const res = await fetch("<<YOUR_GAS_URL>>", {
+        const res = await fetch("https://script.google.com/macros/s/AKfycbzJR7YCb0Jss5WA1vDywkD7Wd_cM_Bx-o2xxSF1cgWSACJk4q1i0AqclE9j9Qw3_31BSw/exec", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ itemName, itemCode })
