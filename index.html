@@ -184,11 +184,21 @@
 
   Object.entries(dict).forEach(([code, status]) => {
     // true → 품절 / false → 재고 있음
-    const readableStatus = (status === "true" || status === true)
+    const displayText = (status === "true" || status === true)
       ? "품절"
       : "재고 있음";
+    const displayColor = (status === "true" || status === true)
+      ? "red"
+      : "green";
 
-    html += `<tr><td>${code}</td><td>${readableStatus}</td></tr>`;
+    html += `
+      <tr>
+        <td>${code}</td>
+        <td style="color:${displayColor}; font-weight:bold;">
+          ${displayText}
+        </td>
+      </tr>
+    `;
   });
 
   html += `</table>`;
