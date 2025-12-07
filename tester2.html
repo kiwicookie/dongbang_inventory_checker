@@ -10,10 +10,8 @@
       background: #f5f5f5;
       display: flex;
       justify-content: center;
-      //align-items: center;
-      //height: 100vh;
-      padding-top: 40px;
-      padding-bottom: 40px;
+      align-items: center;
+      height: 100vh;
     }
     .container {
       background: white;
@@ -38,66 +36,51 @@
       cursor: pointer;
     }
     #result {
-      margin-top: 18px;
-      font-weight: bold;
-    }
-
-    table {
       margin-top: 12px;
-      width: 100%;
-      border-collapse: collapse;
-    }
-    th, td {
-      border: 1px solid #ddd;
-      padding: 8px;
-      font-size: 13px;
-    }
-    th {
-      background: #efefef;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div id="status" style="margin-bottom:10px; font-size:14px; color:#555;">로딩 중...</div>
-
     <h3>📦 카테고리 기반 품목 검색</h3>
 
+
     <!-- 1단 드롭다운 -->
-    <select id="categorySelect">
-      <option value="">카테고리 선택</option>
-    </select>
+  <select id="categorySelect">
+    <option value="">카테고리 선택</option>
+  </select>
 
-    <!-- 2단 드롭다운 -->
-    <select id="itemSelect" disabled>
-      <option value="">상품을 선택하세요</option>
-    </select>
+  <!-- 2단 드롭다운 -->
+  <select id="itemSelect" disabled>
+    <option value="">상품을 선택하세요</option>
+  </select>
 
-    <button onclick="search()">조회하기</button>
+  <button onclick="search()">조회하기</button>
 
-    <div id="result"></div>
-    <div id="tableArea"></div>
-
-  </div>
+  <div id="result"></div>
+</div>
 
 <script>
   let parsedData = {};
-
   async function loadData() {
-    try {
-      document.getElementById("status").innerText = "로딩 중...";
-      const rawUrl = "https://script.google.com/macros/s/AKfycbzrj4iz6nLoeMnlgK8O3vKLsGNncfhL2XK8C9jvx7Y3Hxe2ieXNKK0A2OeDg2f88a8DUg/exec";
-      const order = "?itemName=a&itemCode=b&mode=sheets";
-      const url = rawUrl + order;
 
+    const loadingStatus = document.getElementById("loadingStatus")
+    try {
+      loadingStatus.innerText = "로딩 중...";
+      const rawUrl = "https://script.google.com/macros/s/AKfycbzrj4iz6nLoeMnlgK8O3vKLsGNncfhL2XK8C9jvx7Y3Hxe2ieXNKK0A2OeDg2f88a8DUg/exec"
+      const order = "?itemName=a&itemCode=b&mode=sheets"
+      const url = rawUrl + order;   // 여기에 GAS 웹앱 URL 넣기
       const res = await fetch(url);
-      const textData = await res.text();
+      const textData = await res.text(); // ★ 문자열로 받는다
 
       console.log("받은 문자열:", textData);
 
+      // 문자열을 JSON으로 변환
       const json = JSON.parse(textData);
       parsedData = json.result;
-
+      console.log("받은 parsed:", parsedData);
+      // 첫 번째 드롭다운 채우기
       const categorySelect = document.getElementById("categorySelect");
       Object.keys(parsedData).forEach(key => {
         const op = document.createElement("option");
@@ -105,18 +88,20 @@
         op.textContent = key;
         categorySelect.appendChild(op);
       });
-      document.getElementById("status").innerText = "로딩 완료";
+      loadingStatus.innerText = "로딩 완료";
 
     } catch (err) {
       console.error("데이터 파싱 실패:", err);
-      document.getElementById("status").innerText = "로딩 실패";
+      loadingStatus.innerText = "로딩 실패!";
     }
   }
 
   window.onload = loadData;
 
 
-  // 1단 선택 → 2단 업데이트
+  // ------------------------
+  // 1단 → 2단 드롭다운 자동 구성
+  // ------------------------
   document.getElementById("categorySelect").addEventListener("change", function () {
     const category = this.value;
     const itemSelect = document.getElementById("itemSelect");
@@ -138,11 +123,10 @@
       itemSelect.appendChild(opt);
     });
   });
-
-
-  // 조회 버튼
+// ------------------------
+  // 조회 버튼 클릭
+  // ------------------------
   async function search() {
-
     const category = document.getElementById("categorySelect").value;
     const item = document.getElementById("itemSelect").value;
 
@@ -151,11 +135,11 @@
       return;
     }
 
-    document.getElementById("result").innerText = `${category} → ${item} 조회 중...`;
-
+    document.getElementById("result").innerText = `${category} → ${item} 선택됨`;
+  }
     // GAS에 specific 요청 보내기
     const gasUrl = "https://script.google.com/macros/s/AKfycbzrj4iz6nLoeMnlgK8O3vKLsGNncfhL2XK8C9jvx7Y3Hxe2ieXNKK0A2OeDg2f88a8DUg/exec";
-    const query = `?itemName=${encodeURIComponent(category)}&itemCode=${encodeURIComponent(item)}&mode=specific`;
+    const query = `?itemName=${encodeURIComponent(item)}&mode=specific`;
 
     const res = await fetch(gasUrl + query);
     const text = await res.text();
@@ -165,36 +149,26 @@
       document.getElementById("result").innerText = "결과 없음";
       return;
     }
-
     showTable(json.result, item);
-    document.getElementById("result").innerText = `${category} → ${item} 조회 완료`;
   }
-
-  // 표 출력 함수
+// 표 출력 함수
   function showTable(dict, itemName) {
+    const container = document.getElementById("tableArea");
+    container.innerHTML = "";
 
-  const container = document.getElementById("tableArea");
-  container.innerHTML = "";
+    let html = `
+      <h4>📄 ${itemName} 재고 현황</h4>
+      <table>
+        <tr><th>코드</th><th>상태</th></tr>
+    `;
 
-  let html = `
-    <h4>📄 ${itemName} 재고 현황</h4>
-    <table>
-      <tr><th>코드</th><th>상태</th></tr>
-  `;
+    Object.entries(dict).forEach(([code, status]) => {
+      html += `<tr><td>${code}</td><td>${status}</td></tr>`;
+    });
 
-  Object.entries(dict).forEach(([code, status]) => {
-    // true → 품절 / false → 재고 있음
-    const readableStatus = (status === "true" || status === true)
-      ? "품절"
-      : "재고 있음";
-
-    html += `<tr><td>${code}</td><td>${readableStatus}</td></tr>`;
-  });
-
-  html += `</table>`;
-  container.innerHTML = html;
-}
-
+    html += `</table>`;
+    container.innerHTML = html;
+  }
 </script>
 </body>
 </html>
